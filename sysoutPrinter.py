@@ -3,6 +3,9 @@ from Abstract.outputHandler import OutputHandler
 
 
 class SysoutPrinter(OutputHandler):
+    """
+    Simple console outputter version of outputHandler.
+    """
     def write_tableau(self, table, variables, basic=None, pivot=None):
         for i in variables:
             print(f"{str(i):^8}", end=" ")

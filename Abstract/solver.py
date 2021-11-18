@@ -4,6 +4,9 @@ from Abstract.outputHandler import OutputHandler
 
 
 class Solver:
+    """
+    An abstract class to solve a given LPP
+    """
     outputter: OutputHandler
     problem: lpp
     translator: Converter

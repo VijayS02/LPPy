@@ -3,6 +3,7 @@ from fractions import Fraction
 from typing import Tuple
 import numpy.ma as ma
 import numpy as np
+
 CELL_SIZE = 10
 
 
@@ -11,6 +12,7 @@ class Tableau:
     table: np.array
     pivot: Tuple[int, int]
     theta_ratios = []
+
     def __init__(self, table, basics):
         """
 
@@ -29,13 +31,13 @@ class Tableau:
 
         self.table = table
         self.basics = np.array(basics) - 1
-        self.pivot = (-1,-1)
+        self.pivot = (-1, -1)
 
         self.changing_vars = [-1, -1]
 
     def find_pivot(self):
         raw = self.table[-1][:-1]
-        #masked = ma.masked_where(type(raw) != float, raw)
+        # masked = ma.masked_where(type(raw) != float, raw)
         masked2 = ma.masked_where(raw == 0, raw)
         lowest_col = np.argmin(masked2)
         column_vals = self.table[:, lowest_col][:-1]
@@ -44,10 +46,10 @@ class Tableau:
         store = []
         for value in column_vals:
             if value > 0:
-                store.append(self.table[r][-1]/value)
+                store.append(self.table[r][-1] / value)
             else:
                 store.append(np.Infinity)
-            r +=1
+            r += 1
         pivot_row = np.argmin(store)
         self.theta_ratios = store
 
@@ -62,7 +64,7 @@ class Tableau:
         return pivot
 
     def row_reduce(self):
-        if self.pivot == (-1,-1):
+        if self.pivot == (-1, -1):
             self.find_pivot()
         pivot = self.pivot
 
@@ -70,17 +72,15 @@ class Tableau:
         prow = pivot[0]
         self.basics[prow] = pcol
 
-        new_r = self.table[prow]/self.table[prow][pcol]
+        new_r = self.table[prow] / self.table[prow][pcol]
         self.table[prow] = new_r
         for row in range(len(self.table)):
             if row != prow:
-                mult = self.table[row][pcol]/self.table[prow][pcol]
+                mult = self.table[row][pcol] / self.table[prow][pcol]
                 self.table[row] = self.table[row] - mult * self.table[prow]
-        self.pivot = (-1,-1)
+        self.pivot = (-1, -1)
 
-
-
-    def latex_row(self,row, basic, i=-1):
+    def latex_row(self, row, basic, i=-1):
         if basic != "":
             print(f"x_{basic} & ", end='')
         else:
@@ -93,12 +93,12 @@ class Tableau:
             except:
                 pass
 
-            if y == len(row)-1:
+            if y == len(row) - 1:
                 end_v = "\\\\\n"
 
             if i == self.pivot[0] and y == self.pivot[1]:
                 start = "{\\textit{"
-                print(f"\\textbf{start+latex_cleaner(elem) + '}}'}", end=end_v)
+                print(f"\\textbf{start + latex_cleaner(elem) + '}}'}", end=end_v)
             else:
                 print(f"{latex_cleaner(elem)} ", end=end_v)
             y += 1
@@ -108,31 +108,29 @@ class Tableau:
 
         len_x = len(table[0])
         b = ""
-        cols = '|'.join(["c"]*(len_x+1))
+        cols = '|'.join(["c"] * (len_x + 1))
 
-        print("\\begin{center}\\begin{tabular}{ "+cols+" } ")
+        print("\\begin{center}\\begin{tabular}{ " + cols + " } ")
 
         print(b, end=" & ")
 
-        for i in range(len_x-1):
-            if i == len_x-2:
+        for i in range(len_x - 1):
+            if i == len_x - 2:
                 print(f"{'x_' + str(i + 1)}", end='\\\\\n')
             else:
-                print(f"{'x_'+str(i+1)}", end=' & ')
+                print(f"{'x_' + str(i + 1)}", end=' & ')
 
         print("\hline")
 
         i = 0
         for row in table[:-1]:
-            self.latex_row(row,self.basics[i]+1,i=i)
+            self.latex_row(row, self.basics[i] + 1, i=i)
             i += 1
 
         print("\hline")
 
         self.latex_row(table[-1], "")
         print("\\end{tabular}\\end{center}")
-
-
 
     def print_row(self, row, basic, i=-1):
         print(f"{basic:^{CELL_SIZE}}", end='')
@@ -142,43 +140,41 @@ class Tableau:
                 elem = round(elem, 3)
             except:
                 pass
-            
+
             if i == self.pivot[0] and y == self.pivot[1]:
-                print(f"{'|'+str(elem)+'|':^{CELL_SIZE}}", end='')
+                print(f"{'|' + str(elem) + '|':^{CELL_SIZE}}", end='')
             else:
                 print(f"{str(elem):^{CELL_SIZE}}", end='')
             y += 1
-        #if i != -1:
-            #print(f"{str(self.theta_ratios[i]):^{CELL_SIZE}}", end='')
-
-
+        # if i != -1:
+        # print(f"{str(self.theta_ratios[i]):^{CELL_SIZE}}", end='')
 
     def print(self):
         print("\n\nTABLEAU:")
         len_x = len(table[0])
         b = "Basic"
         print(b.center(10), end="")
-        for i in range(len_x-1):
-            print(f"{'x'+str(i+1):^{CELL_SIZE}}", end='')
+        for i in range(len_x - 1):
+            print(f"{'x' + str(i + 1):^{CELL_SIZE}}", end='')
 
-        print("\n","-"*(10*(len_x+1)))
+        print("\n", "-" * (10 * (len_x + 1)))
         i = 0
         for row in table[:-1]:
-            self.print_row(row,self.basics[i]+1,i=i)
+            self.print_row(row, self.basics[i] + 1, i=i)
             print()
             i += 1
-        print("-"*(10*(len_x+1)))
+        print("-" * (10 * (len_x + 1)))
         self.print_row(table[-1], "-")
         print()
 
     def latex_solve(self):
-        while not all([x>=0 for x in self.table[-1]]):
-        #for i in range(3):
-            #try:
+        while not all([x >= 0 for x in self.table[-1]]):
+            # for i in range(3):
+            # try:
             self.find_pivot()
-            #except Exception as e:
-                #print(e)
-                #break
+            # except Exception as e:
+            # print(e)
+            # break
             self.latex_print()
             print("\\\\")
             print("$\Theta$ ratios = \\begin{bmatrix} ")
@@ -186,33 +182,34 @@ class Tableau:
                 print(val, end="\\\\")
             print()
             print("\\end{bmatrix}")
-            print(f"Departing variable: $x_{self.changing_vars[0]+1}$, incoming variable: $x_{self.changing_vars[1]+1}$")
+            print(
+                f"Departing variable: $x_{self.changing_vars[0] + 1}$, incoming variable: $x_{self.changing_vars[1] + 1}$")
             self.row_reduce()
             print("\\\\Tablaeu after row reduction:\\\\")
             self.latex_print()
 
-
     def solve(self):
-        while not all([x>=0 for x in self.table[-1]]):
+        while not all([x >= 0 for x in self.table[-1]]):
             try:
                 self.find_pivot()
             except:
                 break
             self.print()
-            print(f"Departing variable: x_{self.changing_vars[0]+1}, incoming variable: x_{self.changing_vars[1]+1}")
+            print(
+                f"Departing variable: x_{self.changing_vars[0] + 1}, incoming variable: x_{self.changing_vars[1] + 1}")
             self.row_reduce()
             self.print()
 
 
 def latex_cleaner(elem):
-        stri = str(elem)
-        stri = stri.replace("*", '\\cdot ')
-        return stri
+    stri = str(elem)
+    stri = stri.replace("*", '\\cdot ')
+    return stri
+
 
 def original_cost_to_new(original_cost, observed_cost):
     # Make the entries of the basic variables 0 on the cost row
     raise NotImplementedError
-
 
 
 if __name__ == "__main__":
@@ -246,9 +243,7 @@ if __name__ == "__main__":
     # row3 = np.array([0,1, 0, 0, 1, 1], dtype=float)
     # obj = np.array([-(a-b), 0.0, 0.0])
     table = np.array([row1, row2, obj])
-    t = Tableau(table, [4,5])
+    t = Tableau(table, [4, 5])
     # t.latex_print()
     t.print()
     t.latex_solve()
-
-

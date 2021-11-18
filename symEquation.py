@@ -8,6 +8,9 @@ from Abstract.equation import Equation
 
 
 class SymEquation(Equation):
+    """
+    Concrete equation built based purely on sympy.core.relational.Relational class
+    """
     symq: sp.core.relational
 
     def set_type(self, mode):
