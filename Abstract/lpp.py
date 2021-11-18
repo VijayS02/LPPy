@@ -108,3 +108,11 @@ class LPP:
         :return: A list of variables used in the LPP
         """
         raise NotImplementedError
+
+    def compacted_output(self) -> None:
+        """
+        Similar to the output method, this compacts the simple constraints into a more condensed form easier to
+        read by humans.
+        :return: Nothing.
+        """
+        raise NotImplementedError
