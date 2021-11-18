@@ -9,7 +9,7 @@ This was simply made as my version of notes and interesting way to play around w
 Linear Programming Python Program based on APM236 at UofT
 
 ## Examples
-Please see [main.py](main.py) for examples on how this code can be used.
+Please see [main.py](LPPy/main.py) for examples on how this code can be used.
 
 ## Notes
 Please note that this program is very basic and was not intended to be used as a module for linear programming problems

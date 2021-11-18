@@ -1,9 +1,7 @@
 import sympy
 import sympy as sp
 from sympy.core.relational import Relational
-from sympy.core.relational import Eq
 
-import Abstract.equation
 from Abstract.equation import Equation
 
 
@@ -23,20 +21,20 @@ class SymEquation(Equation):
             i += 1
             new_slack = sympy.symbols(f"y{i}")
 
-        if self.get_type() == Abstract.equation.LEQ:
-            return SymEquation(Relational(self.symq.lhs + new_slack, self.symq.rhs, Abstract.equation.EEQ))
-        elif self.get_type() == Abstract.equation.GEQ:
-            return SymEquation(Relational(self.symq.lhs - new_slack, self.symq.rhs, Abstract.equation.EEQ))
+        if self.get_type() == LPPy.Abstract.equation.LEQ:
+            return SymEquation(Relational(self.symq.lhs + new_slack, self.symq.rhs, LPPy.Abstract.equation.EEQ))
+        elif self.get_type() == LPPy.Abstract.equation.GEQ:
+            return SymEquation(Relational(self.symq.lhs - new_slack, self.symq.rhs, LPPy.Abstract.equation.EEQ))
         else:
             return self
 
     def __neg__(self):
-        if self.get_type() == Abstract.equation.LEQ:
-            new_type = Abstract.equation.GEQ
-        elif self.get_type() == Abstract.equation.GEQ:
-            new_type = Abstract.equation.LEQ
+        if self.get_type() == LPPy.Abstract.equation.LEQ:
+            new_type = LPPy.Abstract.equation.GEQ
+        elif self.get_type() == LPPy.Abstract.equation.GEQ:
+            new_type = LPPy.Abstract.equation.LEQ
         else:
-            new_type = Abstract.equation.EEQ
+            new_type = LPPy.Abstract.equation.EEQ
         return SymEquation(Relational(-self.symq.lhs, -self.symq.rhs, new_type))
 
     def __init__(self, eq):
@@ -56,11 +54,11 @@ class SymEquation(Equation):
     def get_type(self):
         symq_t = type(self.symq)
         if symq_t == sp.core.relational.Le:
-            return Abstract.equation.LEQ
+            return LPPy.Abstract.equation.LEQ
         elif symq_t == sp.core.relational.Ge:
-            return Abstract.equation.GEQ
+            return LPPy.Abstract.equation.GEQ
         elif symq_t == sp.core.relational.Eq:
-            return Abstract.equation.EEQ
+            return LPPy.Abstract.equation.EEQ
         else:
             return None
 

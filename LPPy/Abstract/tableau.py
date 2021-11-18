@@ -1,8 +1,8 @@
 import numpy as np
 
-import Abstract.lpp
-from Abstract.lpp import LPP
-from Abstract.outputHandler import OutputHandler
+import LPPy.Abstract.lpp
+from LPPy.Abstract.lpp import LPP
+from LPPy.Abstract.outputHandler import OutputHandler
 
 
 class Tableau(LPP):
@@ -17,7 +17,7 @@ class Tableau(LPP):
         Return the form of the given LPP as canonical because every tableau represents a canonical problem. (APM236)
         :return: lpp.CANONICAL
         """
-        return Abstract.lpp.CANONICAL
+        return LPPy.Abstract.lpp.CANONICAL
 
     def get_is_max(self):
         """

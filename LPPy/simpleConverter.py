@@ -1,7 +1,6 @@
 import sympy
 from sympy.core.relational import Relational
 
-import Abstract.equation
 from Abstract import lpp, equation
 from Abstract.converter import Converter
 from Abstract.lpp import LPP
@@ -34,7 +33,7 @@ class SimpleConverter(Converter):
         final_constraints += simple
 
         for constraint in non_simple:
-            if constraint.get_type() != Abstract.equation.EQ:
+            if constraint.get_type() != LPPy.Abstract.equation.EQ:
                 # Add slack variables wherever necessary
                 final_constraints.append(constraint.add_slack_variable(self.problem.get_variables()))
             else:

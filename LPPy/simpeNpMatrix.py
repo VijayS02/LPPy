@@ -5,7 +5,10 @@ import numpy.ma as ma
 import numpy as np
 
 CELL_SIZE = 10
-
+"""
+This is a scratch messy version of the rest of this program. I initially wrote this to test out the idea and see 
+the viability of the program.
+"""
 
 class Tableau:
     basics: np.array

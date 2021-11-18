@@ -1,7 +1,7 @@
 from typing import Callable
 
-from Abstract.lpp import LPP
-from Abstract.tableau import Tableau
+from LPPy.Abstract.lpp import LPP
+from LPPy.Abstract.tableau import Tableau
 
 
 class Converter:
