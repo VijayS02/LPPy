@@ -7,6 +7,9 @@ from Abstract.outputHandler import OutputHandler
 
 
 class SimpleLPP(LPP):
+    """
+    Concrete simple LPP class based on APM236.
+    """
     objective: Equation
     constraints: List[Equation]
     is_max: bool

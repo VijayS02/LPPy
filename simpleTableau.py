@@ -10,6 +10,9 @@ import numpy.ma as ma
 
 
 class SimpleTableau(Tableau):
+    """
+    Concrete Tableau class built using Sympy symbols and NP arrays.
+    """
     table: np.array
     outputter: OutputHandler
     originalLPP: LPP

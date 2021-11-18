@@ -4,16 +4,23 @@ from sympy.core.relational import Relational
 import Abstract.equation
 from Abstract import lpp, equation
 from Abstract.converter import Converter
+from Abstract.lpp import LPP
+from Abstract.tableau import Tableau
 from symEquation import SymEquation
 
 
 class SimpleConverter(Converter):
+    """
+    Concrete version of Converter class.
+    """
+
+    # The original LPP
     problem: lpp.LPP
 
     def __init__(self, problem):
         self.problem = problem
 
-    def convert_to_canonical(self):
+    def convert_to_canonical(self) -> LPP:
         if self.problem.get_form() == lpp.CANONICAL:
             return self.problem
 
@@ -28,16 +35,17 @@ class SimpleConverter(Converter):
 
         for constraint in non_simple:
             if constraint.get_type() != Abstract.equation.EQ:
+                # Add slack variables wherever necessary
                 final_constraints.append(constraint.add_slack_variable(self.problem.get_variables()))
             else:
                 final_constraints.append(constraint)
 
         return self.problem.__class__(new_objective, final_constraints, True, self.problem.outputter)
 
-    def convert_to_standard(self):
+    def convert_to_standard(self) -> LPP:
         raise NotImplementedError
 
-    def generate_tableau(self, tableauClass, basic_indexes=None):
+    def generate_tableau(self, tableauClass, basic_indexes=None) -> Tableau:
         problem = self.problem
         if not problem.get_form() == lpp.CANONICAL:
             problem = self.convert_to_canonical()
