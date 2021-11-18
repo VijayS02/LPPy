@@ -1,6 +1,6 @@
-from Abstract import lpp
-from Abstract.converter import Converter
-from Abstract.outputHandler import OutputHandler
+from LPPy.Abstract import lpp
+from LPPy.Abstract.converter import Converter
+from LPPy.Abstract.outputHandler import OutputHandler
 
 
 class Solver:

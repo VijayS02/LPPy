@@ -20,7 +20,7 @@ if __name__ == "__main__":
         std_const.append(SymEquation(var >= 0))
 
     # Create the LPP class
-    test = SimpleLPP(obj_row, [row_1]+std_const,True, sysoutPrinter.SysoutPrinter())
+    test = SimpleLPP(obj_row, [row_1] + std_const, True, sysoutPrinter.SysoutPrinter())
 
     # Use a compacted output method to print out the LPP in text.
     test.compacted_output()

@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from Abstract.equation import Equation
+from LPPy.Abstract.equation import Equation
 
 
 class OutputHandler:

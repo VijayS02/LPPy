@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
-from Abstract.equation import Equation
-from Abstract.outputHandler import OutputHandler
+from LPPy.Abstract.equation import Equation
+from LPPy.Abstract.outputHandler import OutputHandler
 
 # Constants for the different forms
 CANONICAL = 'canonical form'
