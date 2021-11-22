@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from Abstract import equation, lpp
 from Abstract.lpp import LPP
@@ -10,6 +10,9 @@ class SimpleLPP(LPP):
     """
     Concrete simple LPP class based on APM236.
     """
+
+
+
     objective: Equation
     constraints: List[Equation]
     is_max: bool
@@ -35,7 +38,7 @@ class SimpleLPP(LPP):
     def get_form(self):
         simp, non_simp, valid = self.get_simple_constraints()
         if valid:
-            canonical_bool = all([const.get_type() == equation.EQ for const in non_simp])
+            canonical_bool = all([const.get_type() == equation.EEQ for const in non_simp])
             standard_bool = all([const.get_type() == equation.LEQ for const in non_simp])
             if canonical_bool:
                 return lpp.CANONICAL
@@ -60,18 +63,20 @@ class SimpleLPP(LPP):
                         break
         return [x for x in self.variables if x not in seen]
 
-    def get_simple_constraints(self):
+    def get_simple_constraints(self) -> Tuple[List[Equation], List[Equation], bool]:
         simples = []
         not_simples = []
         seen = []
+        expected = [0] * (len(self.get_variables()) - 1) + [1]
+
         for const in self.constraints:
             added = False
             valid_type = (const.get_type() == equation.GEQ) or (const.get_type() == equation.LEQ)
             if const.get_rhs() == 0 and valid_type:
-                mask = [None] * (len(self.variables) - 1)
-                expected = [0] * (len(self.variables) - 1) + [1]
-                for var in self.variables:
-                    new_mask = mask + [var]
+                for var in self.get_variables():
+                    var_copy = self.get_variables().copy()
+                    var_copy.remove(var)
+                    new_mask = var_copy + [var]
                     if const.get_array_form(new_mask) == expected:
                         simples.append(const)
                         seen.append(var)
@@ -80,7 +85,37 @@ class SimpleLPP(LPP):
             if not added:
                 not_simples.append(const)
 
-        return simples, not_simples, all([x in self.variables for x in seen])
+        return simples, not_simples, all([x in seen for x in self.get_variables()])
+
+    def get_printing_consts(self) -> Tuple[List[Equation], List[Equation], bool]:
+        simples = []
+        not_simples = []
+        seen = []
+        type = None
+        similar = True
+        expected = [0] * (len(self.get_variables()) - 1) + [1]
+
+        for const in self.constraints:
+            added = False
+            valid_type = (const.get_type() == equation.GEQ) or (const.get_type() == equation.LEQ)
+            if const.get_rhs() == 0 and valid_type:
+                for var in self.get_variables():
+                    var_copy = self.get_variables().copy()
+                    var_copy.remove(var)
+                    new_mask = var_copy + [var]
+                    if const.get_array_form(new_mask) == expected:
+                        if type is None:
+                            type = const.get_type()
+                        elif type != const.get_type():
+                            similar = False
+                        simples.append(const)
+                        seen.append(var)
+                        added = True
+                        break
+            if not added:
+                not_simples.append(const)
+
+        return simples, not_simples, similar
 
     def compacted_output(self):
         if self.is_max:
@@ -91,13 +126,13 @@ class SimpleLPP(LPP):
         self.outputter.write_eq(self.objective)
         self.outputter.write("\nSubject to:")
 
-        simp, non_simp, result = self.get_simple_constraints()
+        simp, non_simp, similar = self.get_printing_consts()
         for const in non_simp:
             self.outputter.write_eq(const)
         self.outputter.write("\nWhere:")
-        if result:
-            varibs = ','.join([str(x) for x in self.variables])
-            self.outputter.write(varibs + " " + equation.GEQ + " 0")
+        if similar:
+            varibs = ','.join([str(x) for x in self.get_variables() if x not in self.get_free_variables()])
+            self.outputter.write(varibs + " " + simp[0].get_type() + " 0")
         else:
             for const in simp:
                 self.outputter.write_eq(const)
@@ -135,3 +170,12 @@ class SimpleLPP(LPP):
 
     def get_variables(self):
         return sorted(self.variables, key=lambda x: str(x))
+
+    def get_table_form(self) -> List[List]:
+        variables = self.get_variables()
+        store = []
+        simple, non_simple, _ = self.get_simple_constraints()
+        for const in non_simple:
+            store.append(const.get_array_form(variables) + [const.get_rhs()])
+        store.append(self.objective.get_array_form(variables) + [0])
+        return store

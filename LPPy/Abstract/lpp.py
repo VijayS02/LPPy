@@ -26,6 +26,9 @@ class LPP:
         """
         raise NotImplementedError
 
+    def get_table_form(self) -> List[List]:
+        raise NotImplementedError
+
     def get_simple_constraints(self) -> Tuple[List[Equation], List[Equation], bool]:
         """
         A function to scan through the different constraints of the LPP.

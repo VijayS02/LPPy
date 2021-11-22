@@ -1,8 +1,11 @@
+from typing import Tuple, Any
+
 import sympy
 import sympy as sp
 from sympy.core.relational import Relational
 
 from Abstract.equation import Equation
+import Abstract.equation as eq
 
 
 class SymEquation(Equation):
@@ -21,21 +24,37 @@ class SymEquation(Equation):
             i += 1
             new_slack = sympy.symbols(f"y{i}")
 
-        if self.get_type() == LPPy.Abstract.equation.LEQ:
-            return SymEquation(Relational(self.symq.lhs + new_slack, self.symq.rhs, LPPy.Abstract.equation.EEQ))
-        elif self.get_type() == LPPy.Abstract.equation.GEQ:
-            return SymEquation(Relational(self.symq.lhs - new_slack, self.symq.rhs, LPPy.Abstract.equation.EEQ))
+        if self.get_type() == eq.LEQ:
+            return SymEquation(Relational(self.symq.lhs + new_slack, self.symq.rhs, eq.EEQ))
+        elif self.get_type() == eq.GEQ:
+            return SymEquation(Relational(self.symq.lhs - new_slack, self.symq.rhs, eq.EEQ))
         else:
-            return self
+            return
+
+    def force_add_slack_variable_return(self, variables) -> Tuple[Equation, Any]:
+        i = 1
+        new_slack = sympy.symbols(f"y{i}")
+        while new_slack in variables:
+            i += 1
+            new_slack = sympy.symbols(f"y{i}")
+
+        if self.get_type() == eq.LEQ:
+            return SymEquation(Relational(self.symq.lhs + new_slack, self.symq.rhs, eq.EEQ)), new_slack
+        elif self.get_type() == eq.GEQ:
+            return SymEquation(Relational(self.symq.lhs - new_slack, self.symq.rhs, eq.EEQ)), new_slack
+        return SymEquation(Relational(self.symq.lhs + new_slack, self.symq.rhs, eq.EEQ)), new_slack
 
     def __neg__(self):
-        if self.get_type() == LPPy.Abstract.equation.LEQ:
-            new_type = LPPy.Abstract.equation.GEQ
-        elif self.get_type() == LPPy.Abstract.equation.GEQ:
-            new_type = LPPy.Abstract.equation.LEQ
+        if self.get_type() == eq.LEQ:
+            new_type = eq.GEQ
+        elif self.get_type() == eq.GEQ:
+            new_type = eq.LEQ
         else:
-            new_type = LPPy.Abstract.equation.EEQ
-        return SymEquation(Relational(-self.symq.lhs, -self.symq.rhs, new_type))
+            new_type = eq.EEQ
+        try:
+            return SymEquation(Relational(-self.symq.lhs, -self.symq.rhs, new_type))
+        except Exception as e:
+            return SymEquation(-self.symq)
 
     def __init__(self, eq):
         self.symq = eq
@@ -54,11 +73,11 @@ class SymEquation(Equation):
     def get_type(self):
         symq_t = type(self.symq)
         if symq_t == sp.core.relational.Le:
-            return LPPy.Abstract.equation.LEQ
+            return eq.LEQ
         elif symq_t == sp.core.relational.Ge:
-            return LPPy.Abstract.equation.GEQ
+            return eq.GEQ
         elif symq_t == sp.core.relational.Eq:
-            return LPPy.Abstract.equation.EEQ
+            return eq.EEQ
         else:
             return None
 

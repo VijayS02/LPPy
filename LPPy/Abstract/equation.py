@@ -1,6 +1,6 @@
+from __future__ import annotations
 # Equation type constants
 from typing import List, Any
-from __future__ import annotations
 
 EQ = "="
 LEQ = "<="
@@ -11,11 +11,25 @@ LE = "<"
 EEQ = "=="
 
 
+def invert_type(type):
+    if type == EQ:
+        return EQ
+    elif type == GEQ:
+        return LEQ
+    elif type == LEQ:
+        return GEQ
+    elif type == GE:
+        return LE
+    elif type == LE:
+        return GE
+
+
 class Equation:
     """
     An abstract class to define a certain type of equation of form LHS <type> RHS. E.g.
     3x + 2 >= 10, where LHS = 3x + 2, RHS = 10 and TYPE = equation.GEQ
     """
+
     def get_array_form(self, mask: List) -> List:
         """
         Generates an array of coefficients based on the mask.
@@ -86,6 +100,9 @@ class Equation:
         :param variables: A list of used variables to avoid using the same variable name twice.
         :return: A new equation with the slack variable implemented.
         """
+        raise NotImplementedError
+
+    def force_add_slack_variable_return(self, variables) -> Tuple[Equation, Any]:
         raise NotImplementedError
 
     def __neg__(self) -> Equation:

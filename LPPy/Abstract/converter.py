@@ -8,6 +8,7 @@ class Converter:
     """
     An abstract class used to convert between different forms of LPPs.
     """
+
     def convert_to_canonical(self) -> LPP:
         """
         Converts a given LPP to canonical form.
@@ -28,6 +29,12 @@ class Converter:
         :param tableauClass: The type of tableau that is to be initialized.
         :return: the new Tableau of class tableauClass.
         """
+        raise NotImplementedError
+
+    def generate_auxiliary(self) -> LPP:
+        raise NotImplementedError
+
+    def invert(self) -> LPP:
         raise NotImplementedError
 
     def generate_dual(self) -> LPP:
