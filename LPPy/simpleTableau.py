@@ -19,41 +19,51 @@ class SimpleTableau(Tableau):
     basics: np.array
     pivot: tuple
 
-    def __init__(self, objective, constraints, is_max, outputter):
+    def __init__(self, objective, constraints, basic_vars, outputter, ):
         # create a simpleLPP class which can help grab specific attributes like simple constraints
-        temporary = SimpleLPP(objective, constraints, is_max, outputter)
+        temporary = SimpleLPP(objective, constraints, True, outputter)
         self.outputter = outputter
 
         _, eq_constraints, _ = temporary.get_simple_constraints()
         eq_objective = objective
 
         variables = temporary.get_variables()
-        new_obj = equation_to_array(eq_objective, variables)
-        store = [equation_to_array(x, variables) for x in eq_constraints]
-        self.table = np.array(store + [new_obj], dtype=object)
+        new_obj = equation_to_array(eq_objective, variables) + [0]
+        new_obj = [-x for x in new_obj]
+        store = [equation_to_array(x, variables) for x in eq_constraints] + [new_obj]
+        self.table = np.array(store, dtype=object)
         self.originalLPP = temporary
+        self.basics = basic_vars
 
     def find_pivot(self):
-        objective_row = self.table[-1]
-        objective_row = ma.masked_where(objective_row >= 0, objective_row)
-        lowest_entry_in_objective = objective_row.argmin()
+        objective_row = self.table[-1][:-1]
+        masked_objective_row = ma.masked_where(objective_row >= 0, objective_row)
+        # lowest_entry_in_objective = masked_objective_row.argmin()
+        # This doesnt seem to work because of object array type
+        list_ver = list(masked_objective_row)
+        lowest_entry_in_objective_pos = list_ver.index(min(list_ver))
 
-        lowest_entry_column = self.table[:, lowest_entry_in_objective]
+        if type(lowest_entry_in_objective_pos) == ma.core.MaskedConstant:
+            return False
 
-        # Remove objective row
-        lowest_entry_column = lowest_entry_column[:-1]
+        lowest_entry_column = self.table[:-1, lowest_entry_in_objective_pos]
 
-        masked_lec = ma.masked_where(lowest_entry_column > 0, lowest_entry_column)
+        masked_lec = ma.masked_where(lowest_entry_column < 0, lowest_entry_column)
 
-        final_column = self.table[:, -1]
+        final_column = self.table[:-1, -1]
 
-        theta_ratios = np.divide(final_column, masked_lec)
-        self.outputter.write("Theta ratios:" + str(theta_ratios))
-        self.outputter.write(theta_ratios)
+        theta_ratios = np.divide(final_column, masked_lec).filled(np.inf)
+        self.outputter.write_theta_raitos(list(theta_ratios))
 
-        pivot_col = lowest_entry_column
-        pivot_row = theta_ratios.argmin()
+        pivot_col = lowest_entry_in_objective_pos
+        # pivot_row = theta_ratios.argmin() Doesnt work either.
+        list_theta = list(theta_ratios)
+        pivot_row = list_theta.index(min(list_theta))
+        if type(pivot_row) == ma.core.MaskedConstant:
+            return False
+
         self.pivot = (pivot_row, pivot_col)
+        return True
 
     def row_reduce(self):
         assert self.pivot[0] is not None and self.pivot[1] is not None
@@ -71,33 +81,30 @@ class SimpleTableau(Tableau):
         pivot_value = self.table[pivot_row][pivot_col]
         new_pivot_row = self.table[pivot_row] / pivot_value
         self.table[pivot_row] = new_pivot_row
+        pivot_value = self.table[pivot_row][pivot_col]
 
-        for i in range(len(self.table) - 1):
+        for i in range(len(self.table)):
             multiplier = self.table[i][pivot_col] / pivot_value
-            self.table[i] = self.table[i] - (self.table[pivot_row] * multiplier)
+            if i != pivot_row:
+                self.table[i] = self.table[i] - (self.table[pivot_row] * multiplier)
 
         self.pivot = (None, None)
 
     def step_forward(self):
-        self.find_pivot()
-        self.row_reduce()
+        if self.find_pivot():
+            self.row_reduce()
+        else:
+            self.outputter.write("All objective entries are positive.")
 
     def step_backwards(self, pivot):
         self.pivot = pivot
         self.row_reduce()
 
-    def solve(self):
-        obj_row = self.table[-1]
-        # Finish masking n stuff
-        masked_obj = obj_row
-        while not all([x >= 0 for x in masked_obj]):
-            self.step_forward()
-
     def get_simple_constraints(self):
         return self.originalLPP.get_simple_constraints()
 
     def output(self):
-        self.outputter.write_tableau(self.table, self.get_variables())
+        self.outputter.write_tableau(self.table, self.get_variables(), self.basics)
 
     def set_objective(self, new_objective):
         pass
@@ -124,4 +131,4 @@ def equation_to_array(eq: Equation, variables):
     # Convert to rationals so that sympy can show all calculations
     rationalized = [Rational(x) for x in ret_val]
 
-    return np.array(rationalized)
+    return rationalized

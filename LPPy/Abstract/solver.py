@@ -11,14 +11,5 @@ class Solver:
     problem: lpp
     translator: Converter
 
-    def solve(self):
-        raise NotImplementedError
-
-    def row_reduce(self):
-        raise NotImplementedError
-
-    def find_pivot(self):
-        raise NotImplementedError
-
-    def find_theta_ratios(self):
+    def solve(self, basics):
         raise NotImplementedError

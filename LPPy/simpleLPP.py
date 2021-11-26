@@ -126,16 +126,23 @@ class SimpleLPP(LPP):
         self.outputter.write_eq(self.objective)
         self.outputter.write("\nSubject to:")
 
+        self.outputter.start_equation_group()
         simp, non_simp, similar = self.get_printing_consts()
         for const in non_simp:
             self.outputter.write_eq(const)
+
+        self.outputter.end_equation_group()
         self.outputter.write("\nWhere:")
+
+        self.outputter.start_equation_group()
         if similar:
             varibs = ','.join([str(x) for x in self.get_variables() if x not in self.get_free_variables()])
             self.outputter.write(varibs + " " + simp[0].get_type() + " 0")
         else:
             for const in simp:
                 self.outputter.write_eq(const)
+
+        self.outputter.end_equation_group()
 
     def output(self):
         if self.is_max:

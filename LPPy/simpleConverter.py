@@ -5,6 +5,7 @@ from sympy.core.relational import Relational
 from Abstract import lpp, equation
 from Abstract.converter import Converter
 from Abstract.lpp import LPP
+from Abstract.outputHandler import OutputHandler
 from Abstract.tableau import Tableau
 from symEquation import SymEquation
 
@@ -16,9 +17,11 @@ class SimpleConverter(Converter):
 
     # The original LPP
     problem: lpp.LPP
+    outputter: OutputHandler
 
     def __init__(self, problem):
         self.problem = problem
+        self.outputter = problem.outputter
 
     def convert_to_canonical(self) -> LPP:
         if self.problem.get_form() == lpp.CANONICAL:
@@ -27,30 +30,44 @@ class SimpleConverter(Converter):
         new_objective = self.problem.get_objective()
         if not self.problem.get_is_max():
             new_objective = -new_objective
+            self.outputter.write("Convert the LPP from minimization to maximization. Generating the following objective"
+                                 "function to be maximized:")
+            self.outputter.write_eq(new_objective)
 
         simple, non_simple, _ = self.problem.get_simple_constraints()
 
         final_constraints = []
         final_constraints += simple
 
+        old_vars = self.problem.get_variables()
+        new_vars = []
+
         for constraint in non_simple:
             if constraint.get_type() != equation.EQ:
                 # Add slack variables wherever necessary
-                final_constraints.append(constraint.add_slack_variable(self.problem.get_variables()))
+                new_const = constraint.add_slack_variable(new_vars + old_vars)
+                new_vars += list(set(new_const.get_vars()) - set(old_vars))
+                final_constraints.append(new_const)
             else:
                 final_constraints.append(constraint)
 
-        return self.problem.__class__(new_objective, final_constraints, True, self.problem.outputter)
+        new_problem = self.problem.__class__(new_objective, final_constraints, True, self.outputter)
+        added_vars = list(set(new_problem.get_variables()) - set(old_vars))
+
+        self.outputter.write_variables(added_vars, "Introducing slack variables.")
+        return new_problem
 
     def convert_to_standard(self) -> LPP:
         raise NotImplementedError
 
     def generate_tableau(self, tableauClass, basic_indexes=None) -> Tableau:
+
         problem = self.problem
         if not problem.get_form() == lpp.CANONICAL:
+            self.outputter.write("In order to generate a tableau, the LPP needs to be in canonical form.")
             problem = self.convert_to_canonical()
 
-        # Do auxilery stuffs
+        # Do auxiliary stuffs
         simple, non_simple, _ = problem.get_simple_constraints()
 
         # This just takes the last m variables and sets them as the basic vars
@@ -64,15 +81,20 @@ class SimpleConverter(Converter):
 
     def invert(self) -> LPP:
         new_obj = -self.problem.get_objective()
+        self.outputter.write("New objective function")
+        self.outputter.write_eq(new_obj)
         return self.problem.__class__(new_obj, self.problem.get_constraints(), False, self.problem.outputter)
 
     def generate_auxiliary(self):
         assert self.problem.get_form() == lpp.CANONICAL
-
+        self.outputter.write("Create auxiliary problem in order to find tableau.")
         simple, non_simple, _ = self.problem.get_simple_constraints()
+
         variables = self.problem.get_variables()
+
         new_vars = []
         new_consts = []
+
         for const in non_simple:
             try:
                 if const.get_rhs() < 0:
@@ -85,20 +107,26 @@ class SimpleConverter(Converter):
             new_consts.append(new_eq)
 
         new_consts += simple
+
         for var in new_vars:
             new_consts.append(SymEquation(Relational(var, 0, equation.GEQ)))
+        self.outputter.write_variables(new_vars, "Create artificial variables")
 
         new_obj = SymEquation(-sum(new_vars))
+        self.outputter.write("Create a new objective function from artificial variables.")
+        self.outputter.write_eq(new_obj)
 
         return self.problem.__class__(new_obj, new_consts, True, self.problem.outputter)
 
-
     def generate_dual(self):
         # This breaks a lot of coding rules but its just for practice.
+        self.outputter.write("Now create dual of this primal problem.")
         problem = self.problem
         if problem.get_is_max():
             print("Converting to minimization problem.")
+            self.outputter.write("Primal problem must be of type minimization, convert primal to minimization problem.")
             problem = self.invert()
+
             # raise ValueError("Cannot create dual LPP from maximization problem. "
             #                  "Primal needs to be of type Minimization.")
 

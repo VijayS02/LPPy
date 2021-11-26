@@ -23,7 +23,7 @@ class Converter:
         """
         raise NotImplementedError
 
-    def generate_tableau(self, tableauClass: Callable) -> Tableau:
+    def generate_tableau(self, tableauClass: Callable, basic_indexes) -> Tableau:
         """
         Generates a tableau from an LPP.
         :param tableauClass: The type of tableau that is to be initialized.

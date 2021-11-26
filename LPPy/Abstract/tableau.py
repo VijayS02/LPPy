@@ -1,6 +1,9 @@
+from typing import List
+
 import numpy as np
 
 import LPPy.Abstract.lpp
+from Abstract.equation import Equation
 from LPPy.Abstract.lpp import LPP
 from LPPy.Abstract.outputHandler import OutputHandler
 
@@ -11,6 +14,10 @@ class Tableau(LPP):
     """
     # An output handler to send the output to.
     outputter: OutputHandler
+    table: List
+
+    def __init__(self, objective: Equation, constraints: List[Equation], is_max: bool, outputter: OutputHandler):
+        super().__init__(objective, constraints, is_max, outputter)
 
     def get_form(self) -> str:
         """
@@ -28,3 +35,9 @@ class Tableau(LPP):
 
     def set_is_max(self, new_max: bool):
         return False
+
+    def step_forward(self):
+        raise NotImplementedError
+
+    def step_backward(self, pivot):
+        raise NotImplementedError

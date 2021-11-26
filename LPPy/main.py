@@ -1,6 +1,7 @@
 import sympy
 from sympy import Eq
 
+from Abstract.simpleSolver import SimpleSolver
 from simpleTableau import SimpleTableau
 import sysoutPrinter
 from simpleConverter import SimpleConverter
@@ -9,12 +10,12 @@ from symEquation import SymEquation
 
 if __name__ == "__main__":
     # Setup a list of variables
-    vr = sympy.symbols("x1 x2 x3 x4")
+    vr = sympy.symbols("x1 x2 x3")
     # Create an objective row as a SymEquation
-    obj_row = SymEquation(-vr[0] + -vr[2] + 2*vr[3])
+    obj_row = SymEquation(-1*vr[0] + 5*vr[1] + 4*vr[2])
     # Create the first constraint on the given LPP.
-    row_1 = SymEquation(Eq(vr[0] + 2*vr[1] + vr[3], 4))
-    row_2 = SymEquation(Eq(-vr[1] + vr[2] - vr[3], -1))
+    row_1 = SymEquation((2*vr[0] + 4*vr[1] + vr[2] <= 12))
+    row_2 = SymEquation((vr[0] <= 3))
 
     # Create some simple constraints to ensure the LPP can be converted
     std_const = []
@@ -26,21 +27,8 @@ if __name__ == "__main__":
 
     # Use a compacted output method to print out the LPP in text.
     test.compacted_output()
-    print(test.get_form())
-    # Now testing of conversion to canonical form
-    converter = SimpleConverter(test)
-    # canon = converter.convert_to_canonical()
-    # canon.compacted_output()
 
-    # we can see that U-1 has been added to the list of variables
-    # v = canon.get_variables()
-
-    table = converter.generate_tableau(SimpleTableau)
-    # table.output()
-    print("\n\n")
-    converter.generate_auxiliary().compacted_output()
-    # print(test.get_table_form())
-    # print(canon.get_objective().get_array_form(v))
-    # print(canon.get_form())
+    solver = SimpleSolver(test, SimpleConverter)
+    solver.solve([3,4])
 
 
