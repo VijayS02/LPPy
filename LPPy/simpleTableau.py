@@ -28,7 +28,7 @@ class SimpleTableau(Tableau):
         eq_objective = objective
 
         variables = temporary.get_variables()
-        new_obj = equation_to_array(eq_objective, variables) + [0]
+        new_obj = equation_to_array(eq_objective, variables) + [eq_objective.get_constants()]
         new_obj = [-x for x in new_obj]
         store = [equation_to_array(x, variables) for x in eq_constraints] + [new_obj]
         self.table = np.array(store, dtype=object)

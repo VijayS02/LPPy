@@ -17,6 +17,17 @@ class SymEquation(Equation):
     def set_type(self, mode):
         self.symq = Relational(self.symq.lhs, self.symq.rhs, mode)
 
+    def get_constants(self):
+        consts = 0
+        if self.get_type() is None:
+            return self.symq.coeff(sympy.symbols("x"), 0)
+        consts -= self.symq.lhs.coeff(sympy.symbols("x"), 0)
+        consts += self.symq.rhs.coeff(sympy.symbols("x"), 0)
+        return consts
+
+    def solve_for(self, var):
+        return sympy.solve(self.symq, var)
+
     def add_slack_variable(self, variables) -> Equation:
         i = 1
         new_slack = sympy.symbols(f"y{i}")
@@ -88,7 +99,7 @@ class SymEquation(Equation):
         return self.symq.rhs
 
     def substitute(self, old_var, new_var):
-        self.symq.subs(old_var, new_var)
+        return SymEquation(self.symq.subs(old_var, new_var))
 
     def __str__(self):
         if self.get_type() is not None:

@@ -110,13 +110,21 @@ class SimpleConverter(Converter):
 
         for var in new_vars:
             new_consts.append(SymEquation(Relational(var, 0, equation.GEQ)))
+
+        obj_eq = SymEquation(-sum(new_vars))
+        subbed_obj = obj_eq
+        for i in range(len(new_vars)):
+            rearranged_eq = new_consts[i].solve_for(new_vars[i])[0]
+            subbed_obj = subbed_obj.substitute(new_vars[i], rearranged_eq)
+
         self.outputter.write_variables(new_vars, "Create artificial variables")
 
-        new_obj = SymEquation(-sum(new_vars))
         self.outputter.write("Create a new objective function from artificial variables.")
-        self.outputter.write_eq(new_obj)
+        self.outputter.write(obj_eq)
+        self.outputter.write("Substitute y's with solved values to eliminate them from the objective.")
+        self.outputter.write_eq(subbed_obj)
 
-        return self.problem.__class__(new_obj, new_consts, True, self.problem.outputter)
+        return self.problem.__class__(subbed_obj, new_consts, True, self.problem.outputter)
 
     def generate_dual(self):
         # This breaks a lot of coding rules but its just for practice.

@@ -11,5 +11,8 @@ class Solver:
     problem: lpp
     translator: Converter
 
+    def solve_with_two_phase(self):
+        raise NotImplementedError
+
     def solve(self, basics):
         raise NotImplementedError

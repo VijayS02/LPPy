@@ -61,7 +61,7 @@ class Equation:
         """
         raise NotImplementedError
 
-    def substitute(self, old_var: Any, new_var: Any) -> None:
+    def substitute(self, old_var: Any, new_var: Any) -> Any:
         """
         Substitute a variable in this equation with an expression
         :param old_var: The variable to substitute.
@@ -83,6 +83,12 @@ class Equation:
         implementation details.
         :return: A list of variables
         """
+        raise NotImplementedError
+
+    def solve_for(self, var):
+        raise NotImplementedError
+
+    def get_constants(self):
         raise NotImplementedError
 
     def set_type(self, mode: str) -> None:
