@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Tuple, List
 
 from LPPy.Abstract.lpp import LPP
 from LPPy.Abstract.tableau import Tableau
@@ -31,7 +31,7 @@ class Converter:
         """
         raise NotImplementedError
 
-    def generate_auxiliary(self) -> LPP:
+    def generate_auxiliary(self) -> Tuple[LPP, List]:
         raise NotImplementedError
 
     def invert(self) -> LPP:

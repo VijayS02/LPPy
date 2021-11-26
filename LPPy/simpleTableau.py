@@ -28,12 +28,21 @@ class SimpleTableau(Tableau):
         eq_objective = objective
 
         variables = temporary.get_variables()
-        new_obj = equation_to_array(eq_objective, variables) + [eq_objective.get_constants()]
+        new_obj = equation_to_array(eq_objective, variables) + [-eq_objective.get_constants(variables)]
         new_obj = [-x for x in new_obj]
         store = [equation_to_array(x, variables) for x in eq_constraints] + [new_obj]
         self.table = np.array(store, dtype=object)
         self.originalLPP = temporary
         self.basics = basic_vars
+
+    def get_basics(self):
+        return self.basics
+
+    def get_eq_array(self, eq, vars):
+        return equation_to_array(eq, vars)
+
+    def get_cost(self):
+        return self.table[-1][-1]
 
     def find_pivot(self):
         objective_row = self.table[-1][:-1]
@@ -107,10 +116,18 @@ class SimpleTableau(Tableau):
         self.outputter.write_tableau(self.table, self.get_variables(), self.basics)
 
     def set_objective(self, new_objective):
-        pass
+        assert len(self.table[-1]) == len(new_objective)
+        self.table[-1] = new_objective
 
     def get_objective(self):
         pass
+
+    def remove_variables(self, indexes):
+        indexes = sorted(indexes)
+        for i in range(len(indexes)):
+            self.table = np.delete(self.table, indexes[i] - i, axis=1)
+
+        self.originalLPP.remove_variables(indexes)
 
     def set_constraints(self, constraints):
         pass

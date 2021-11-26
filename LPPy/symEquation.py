@@ -6,6 +6,7 @@ from sympy.core.relational import Relational
 
 from Abstract.equation import Equation
 import Abstract.equation as eq
+from sympy import Rational
 
 
 class SymEquation(Equation):
@@ -17,12 +18,12 @@ class SymEquation(Equation):
     def set_type(self, mode):
         self.symq = Relational(self.symq.lhs, self.symq.rhs, mode)
 
-    def get_constants(self):
+    def get_constants(self, vars):
         consts = 0
         if self.get_type() is None:
-            return self.symq.coeff(sympy.symbols("x"), 0)
-        consts -= self.symq.lhs.coeff(sympy.symbols("x"), 0)
-        consts += self.symq.rhs.coeff(sympy.symbols("x"), 0)
+            return find_constants_focus(self.symq, vars)
+        consts -= find_constants_focus(self.symq.lhs, vars)
+        consts += find_constants_focus(self.symq.rhs, vars)
         return consts
 
     def solve_for(self, var):
@@ -40,7 +41,13 @@ class SymEquation(Equation):
         elif self.get_type() == eq.GEQ:
             return SymEquation(Relational(self.symq.lhs - new_slack, self.symq.rhs, eq.EEQ))
         else:
-            return
+            return None
+
+    def remove_variables(self, variables):
+        eq = self.symq
+        for var in variables:
+            eq = eq.subs(var, 0)
+        self.symq = eq
 
     def force_add_slack_variable_return(self, variables) -> Tuple[Equation, Any]:
         i = 1
@@ -109,3 +116,10 @@ class SymEquation(Equation):
 
     def get_vars(self):
         return list(self.symq.free_symbols)
+
+
+def find_constants_focus(focus, vars):
+    new_exp = focus
+    for var in vars:
+        new_exp = new_exp.subs(var, 0)
+    return Rational(new_exp)

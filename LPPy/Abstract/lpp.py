@@ -26,6 +26,9 @@ class LPP:
         """
         raise NotImplementedError
 
+    def remove_variables(self, indexes):
+        raise NotImplementedError
+
     def get_table_form(self) -> List[List]:
         raise NotImplementedError
 

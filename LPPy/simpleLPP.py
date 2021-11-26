@@ -63,6 +63,30 @@ class SimpleLPP(LPP):
                         break
         return [x for x in self.variables if x not in seen]
 
+    def remove_variables(self, indexes):
+        removed = []
+        i = 0
+        for index in indexes:
+            var = self.get_variables()[index - i]
+            removed.append(var)
+            self.variables.remove(var)
+            i += 1
+
+        simple, non_simp, _ = self.get_simple_constraints()
+
+        final_const = []
+
+        for const in simple:
+            if const.get_vars()[0] not in removed:
+                final_const.append(const)
+
+        for const in non_simp:
+            final_const.append(const.remove_variables(removed))
+
+        self.constraints = final_const
+
+
+
     def get_simple_constraints(self) -> Tuple[List[Equation], List[Equation], bool]:
         simples = []
         not_simples = []

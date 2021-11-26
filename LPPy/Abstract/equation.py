@@ -40,6 +40,9 @@ class Equation:
         # Note that this only gets the array form of the LHS of the equation.
         raise NotImplementedError
 
+    def remove_variables(self, variables):
+        raise NotImplementedError
+
     def get_type(self) -> str:
         """
         Get the type of equation as defined by constants at the top of equation.py.
@@ -88,7 +91,7 @@ class Equation:
     def solve_for(self, var):
         raise NotImplementedError
 
-    def get_constants(self):
+    def get_constants(self, vars):
         raise NotImplementedError
 
     def set_type(self, mode: str) -> None:

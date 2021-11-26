@@ -55,6 +55,7 @@ class SimpleConverter(Converter):
         added_vars = list(set(new_problem.get_variables()) - set(old_vars))
 
         self.outputter.write_variables(added_vars, "Introducing slack variables.")
+        self.problem = new_problem
         return new_problem
 
     def convert_to_standard(self) -> LPP:
@@ -76,16 +77,16 @@ class SimpleConverter(Converter):
         else:
             variables = problem.get_variables()
             basic_vars = [variables[i] for i in basic_indexes]
-
         return tableauClass(problem.get_objective(), non_simple, basic_vars, problem.outputter)
 
     def invert(self) -> LPP:
         new_obj = -self.problem.get_objective()
         self.outputter.write("New objective function")
         self.outputter.write_eq(new_obj)
-        return self.problem.__class__(new_obj, self.problem.get_constraints(), False, self.problem.outputter)
+        self.problem = self.problem.__class__(new_obj, self.problem.get_constraints(), False, self.problem.outputter)
+        return self.problem
 
-    def generate_auxiliary(self):
+    def generate_auxiliary(self) -> tuple[LPP, list]:
         assert self.problem.get_form() == lpp.CANONICAL
         self.outputter.write("Create auxiliary problem in order to find tableau.")
         simple, non_simple, _ = self.problem.get_simple_constraints()
@@ -120,11 +121,12 @@ class SimpleConverter(Converter):
         self.outputter.write_variables(new_vars, "Create artificial variables")
 
         self.outputter.write("Create a new objective function from artificial variables.")
-        self.outputter.write(obj_eq)
+        self.outputter.write_eq(obj_eq)
         self.outputter.write("Substitute y's with solved values to eliminate them from the objective.")
         self.outputter.write_eq(subbed_obj)
 
-        return self.problem.__class__(subbed_obj, new_consts, True, self.problem.outputter)
+        self.problem = self.problem.__class__(subbed_obj, new_consts, True, self.problem.outputter)
+        return self.problem, new_vars
 
     def generate_dual(self):
         # This breaks a lot of coding rules but its just for practice.
@@ -168,4 +170,5 @@ class SimpleConverter(Converter):
 
         # Create new objective: Bt * X
         new_objective = SymEquation(transposed_form[-1].dot(new_vars + [1]))
-        return problem.__class__(new_objective, new_consts, True, problem.outputter)
+        self.problem = problem.__class__(new_objective, new_consts, True, problem.outputter)
+        return self.problem

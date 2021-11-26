@@ -19,12 +19,24 @@ class Tableau(LPP):
     def __init__(self, objective: Equation, constraints: List[Equation], is_max: bool, outputter: OutputHandler):
         super().__init__(objective, constraints, is_max, outputter)
 
+    def remove_variables(self, indexes):
+        raise NotImplementedError
+
+    def get_cost(self):
+        raise NotImplementedError
+
+    def get_basics(self):
+        raise NotImplementedError
+
     def get_form(self) -> str:
         """
         Return the form of the given LPP as canonical because every tableau represents a canonical problem. (APM236)
         :return: lpp.CANONICAL
         """
         return LPPy.Abstract.lpp.CANONICAL
+
+    def get_eq_array(self, eq, vars):
+        raise NotImplementedError
 
     def get_is_max(self):
         """
