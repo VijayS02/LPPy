@@ -4,7 +4,7 @@
 
 _Please note that there are python modules which can compute simplex method and are much more vetted sources of 
 Linear optimization_.
-This was simply made as my version of notes and interesting way to play around with the simplex method in python.
+This was simply made as my version of notes and interesting way to play around with the simplex method in python and many modules were intended to be abstracted but may require modification for proper use.
 
 Linear Programming Python Program based on APM236 at UofT
 
